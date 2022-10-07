@@ -1,49 +1,34 @@
-import { Component } from 'react';
+// import { Component } from 'react';
 import Modal from 'components/Modal/Modal';
 import { ImageGalleryItemLi, Img } from './ImageGalleryItem.styled';
 import PropTypes from 'prop-types';
+import { useState } from 'react';
 
-class ImageGalleryItem extends Component {
-  state = {
-    isOpenModal: false,
-  };
-  static propTypes = {
-    webformatURL: PropTypes.string.isRequired,
-    largeImageURL: PropTypes.string.isRequired,
-     alt: PropTypes.string.isRequired,
-  };
+export default function ImageGalleryItem({ webformatURL, largeImageURL, alt }) {
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
-  openModal = () => {
-    this.setState({ isOpenModal: true });
-  };
+  // const openModal = () => setIsOpenModal(true);
+  // const closeModal = () => setIsOpenModal(false);
 
-  closeModal = () => {
-    this.setState({ isOpenModal: false });
-  };
-
-  render() {
-    const { webformatURL, largeImageURL, alt } = this.props;
-    return (
-      <>
-        <ImageGalleryItemLi>
-          <Img
-            src={webformatURL}
-            alt={alt}
-            onClick={() => {
-              this.openModal();
-            }}
-          />
-        </ImageGalleryItemLi>
-        {this.state.isOpenModal && (
-          <Modal
-            img={largeImageURL}
-            alt={alt}
-            onClose={this.closeModal}
-          ></Modal>
-        )}
-      </>
-    );
-  }
+  return (
+    <>
+      <ImageGalleryItemLi>
+        <Img
+          src={webformatURL}
+          alt={alt}
+          onClick={() => setIsOpenModal(true)}
+        />
+      </ImageGalleryItemLi>
+      {isOpenModal && (
+        <Modal img={largeImageURL} alt={alt} onClose={() => setIsOpenModal(false)}></Modal>
+      )}
+    </>
+  );
 }
 
-export default ImageGalleryItem;
+ImageGalleryItem.propTypes = {
+  webformatURL: PropTypes.string.isRequired,
+  largeImageURL: PropTypes.string.isRequired,
+  alt: PropTypes.string.isRequired,
+};
+

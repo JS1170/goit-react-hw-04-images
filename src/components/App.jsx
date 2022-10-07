@@ -1,5 +1,5 @@
 import { apiPixabay } from '../API';
-import { Component } from 'react';
+// import { Component } from 'react';
 import ImageGallery from './ImageGallery/ImageGallery';
 // import css from './App/App.modules.css';
 // import './App.modules.css'
@@ -7,81 +7,80 @@ import Searchbar from './Searchbar/Searchbar';
 import Button from './Button/Button';
 import Loader from './Loader/Loader';
 import { Box } from '../Constants/Box';
+import { useState, useEffect} from 'react';
 
 
-class App extends Component {
-  state = {
-    page: 1,
-    img: [],
-    search: '',
-    emptySearch: false,
-    loadMoreBtn: false,
-    isLoader: false,
-  };
 
-  async componentDidUpdate(_, prevState) {
-    const { page, search } = this.state;
-
-    if (prevState.search !== search || prevState.page !== page) {
+export default function App() {
+  const [page, setPage] = useState(1);
+  const [img, setImg] = useState([]);
+  const [search, setSearch] = useState('');
+  const [emptySearch, setEmptySearch] = useState(false);
+  const [loadMoreBtn, setLoadMoreBtn] = useState(false);
+  const [isLoader, setIsLoader] = useState(false);
+  
+  useEffect(() => {
+    async function gettingImgFunc() {
       try {
-        this.setState({
-          isLoader: true,
-          loadMoreBtn: false,
-        });
+        setIsLoader(false);
+        setLoadMoreBtn(false);
+     
         const resultApi = await apiPixabay(search, page);
-        this.setState(prevState => ({
-          img: [...prevState.img, ...resultApi.data.hits],
-        }));
-        this.checkImgArray(resultApi.data.hits);
+        setImg(prevImg => [...prevImg, ...resultApi.data.hits],
+        );
+       checkImgArray(resultApi.data.hits);
         if (resultApi.data.total > page * 12) {
-          this.setState({
-            loadMoreBtn: true,
-          });
+          setLoadMoreBtn(true);
         }
       } catch (error) {
         console.log(error);
-        this.setState({ emptySearch: true });
+        setEmptySearch(true);
       }
       finally {
-         this.setState({isLoader: false})
+        setIsLoader(false)
       }
     }
-  }
+    if (search) {
+      gettingImgFunc();
+    }
+  }, [page, search])
 
-  getValueForm = getSearchInput => {
-    if (this.state.search === getSearchInput && this.state.page === 1) {
+
+  const getValueForm = getSearchInput => {
+    if (search === getSearchInput &&page === 1) {
       return;
     }
-    this.setState(() => ({ search: getSearchInput, img: [], page: 1 }));
+    setSearch(getSearchInput);
+    setImg([]);
+    setPage(1);
   };
 
-  checkImgArray = array => {
+  const checkImgArray = array => {
     if (!array.length) {
-      this.setState({ emptySearch: true, loadMoreBtn: false });
+      setEmptySearch(true);
+      setLoadMoreBtn(false);
     } else {
-      this.setState({ emptySearch: false });
+      setEmptySearch(false);
     }
   };
 
-  loadMoreClick = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }))
+  const loadMoreClick = () => {
+   setPage(prevPage => prevPage + 1)
   }
 
-  render() {
-    const { img, emptySearch, loadMoreBtn, isLoader} = this.state;
-    return (
+ 
+    // const { img, emptySearch, loadMoreBtn, isLoader} = this.state;
+  return (
 
       <Box display="grid" gridTemplateColumns="1fr" gridGap="16px" pb="24px">
-        <Searchbar onSubmit={this.getValueForm} />
+      <Searchbar onSubmit={getValueForm} />
         {emptySearch && <p>Ничего не найдено</p>}
         {img.length > 0 && <ImageGallery images={img} />}
-        {loadMoreBtn && <Button onClick={this.loadMoreClick} />}
+        {loadMoreBtn && <Button onClick={loadMoreClick} />}
         {isLoader && <Loader/>}
       </Box>
     );
   }
-}
 
-export default App;
+
+// export default App;
